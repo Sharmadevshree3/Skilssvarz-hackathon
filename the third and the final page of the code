@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Music Website</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            height: 100vh;
+            background: black;
+            display: grid;
+            place-items: center;
+            color: white;
+        }
+        header {
+            width: 85%;
+            height: 95%;
+            border: 1px solid #4d5e7c;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        .main_content {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            overflow: hidden;
+        }
+        .menu_side {
+            width: 25%;
+            height: 100%;
+            background-color: rgb(11, 18, 41);
+            padding: 15px;
+            overflow-y: auto;
+        }
+        .song_side {
+            width: 75%;
+            background: rgb(25, 13, 67);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .master_play {
+            width: 100%;
+            height: 10%;
+            background-color: rgb(29, 29, 71);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .master_play audio {
+            width: 100%;
+        }
+        .menu_side h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .playlist {
+            margin-top: 30px;
+        }
+        .playlist h1 {
+            font-size: 16px;
+            margin: 15px 0;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: rgb(170, 170, 170);
+        }
+        .playlist h1:hover {
+            color: white !important;
+            background: rgba(81, 178, 204, 0.1);
+            transform: translateX(5px);
+        }
+        .playlist h1:hover .bi-music-note {
+            color: #f50202;
+        }
+        .playlist h1:hover .bi-download {
+            color: #f60dcb;
+        }
+        .playlist h1:hover .bi-calendar2-heart {
+            color: #6aff6a;
+        }
+        .playlist h1:hover .bi-person-circle {
+            color: #0f0be9;
+        }
+        .playlist h1:hover .bi-boombox-fill {
+            color: #dae90b;
+        }
+        .playlist h1:hover .bi-music-player{
+            color: blueviolet;
+        }
+        .playlist h1 i {
+            transition: all 0.3s ease;
+        }
+        .playlist h1.active {
+            color: rgb(45, 220, 239) !important;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Song categories tabs */
+        .song-categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .song-categories::-webkit-scrollbar {
+            height: 3px;
+        }
+        .song-categories button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+        .song-categories button.active {
+            background: linear-gradient(90deg, #1026eb 0%, #2575fc 100%);
+            font-weight: 500;
+        }
+        .song-categories button:hover:not(.active) {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* Song sections */
+        .song-section {
+            display: none;
+        }
+        .song-section.active {
+            display: block;
+        }
+        
+        /* Featured Singers Section */
+        .featured-singers {
+            width: 90%;
+            margin: 0 auto 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .featured-singers h4 {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .singers-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        
+        .singer-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .singer-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .singer-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #2111cb;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .singer-card:hover .singer-image {
+            border-color: #2575fc;
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.5);
+        }
+        
+        .singer-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+        
+        .singer-card:hover .singer-image img {
+            transform: scale(1.1);
+        }
+        
+        .listen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .singer-card:hover .listen-overlay {
+            opacity: 1;
+        }
+        
+        .listen-text {
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 5px 10px;
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 20px;
+        }
+        
+        .singer-name {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .popular_song {
+            width: 90%;
+            height: auto;
+            margin: auto;
+            margin-top: 15px;
+            padding: 15px;
+        }
+        .popular_song .h4 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .popular_song .h4 .bi {
+            color: #e4e4ec;
+            cursor: pointer;
+            transition: .3s linear;
+            font-size: 1.5rem;
+        }
+        .popular_song .h4 .bi:hover {
+            color: #fff;
+            transform: scale(1.1);
+        }
+        .pop_song {
+            width: 100%;
+            height: 180px;
+            margin-top: 15px;
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px 0;
+            scroll-behavior: smooth;
+        }
+        .pop_song::-webkit-scrollbar {
+            height: 5px;
+        }
+        .pop_song::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+        .songItem {
+            min-width: 120px;
+            height: 160px;
+            list-style-type: none;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .songItem:hover {
+            transform: translateY(-5px);
+        }
+        .img_play {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .img_play img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+        .songItem:hover .img_play img {
+            transform: scale(1.1);
+            filter: brightness(0.8);
+        }
+        .play_btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 18px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .songItem:hover .play_btn {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        .songItem p {
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Enhanced Now Playing indicator */
+        .now_playing {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            display: none;
+            box-shadow: 0 2px 10px rgba(22, 124, 227, 0.5);
+            z-index: 2;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(17, 42, 203, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(14, 17, 225, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(38, 105, 171, 0); }
+        }
+        
+        .now_playing::after {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-left: 6px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 3v18h-2v-18h2zm-5 14v4h-2v-4h2zm10-8v12h-2v-12h2zm-5 4v8h-2v-8h2z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            vertical-align: middle;
+            animation: equalize 1.5s infinite steps(25);
+        }
+        
+        @keyframes equalize {
+            0% { height: 12px; }
+            25% { height: 4px; }
+            50% { height: 12px; }
+            75% { height: 8px; }
+            100% { height: 12px; }
+        }
+        
+        .songItem.playing {
+            position: relative;
+        }
+        
+        .songItem.playing::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 10px;
+            background: rgba(29, 141, 234, 0.2);
+            z-index: 1;
+            animation: glow 2s infinite;
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(111, 89, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(73, 17, 203, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(45, 17, 203, 0.5); }
+        }
+        
+        .songItem.playing .play_btn {
+            background: #2968ef;
+            color: white;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .songItem.playing .play_btn i {
+            display: none;
+        }
+        
+        .songItem.playing .play_btn::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+            margin-left: -2px;
+            animation: playPause 1.5s infinite steps(1);
+        }
+        
+        @keyframes playPause {
+            0% { clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%); }
+            50% { clip-path: polygon(50% 0%, 50% 0%, 50% 100%, 50% 100%); }
+            100% { clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%); }
+        }
+
+        /* Audio Trimmer Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .trim-modal {
+            background: #1e1e2e;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+        }
+
+        .trim-modal h2 {
+            margin-bottom: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .trim-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-container label {
+            color: white;
+            min-width: 60px;
+        }
+
+        .range-container input[type="range"] {
+            flex: 1;
+        }
+
+        .time-display {
+            color: white;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .trim-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .trim-actions button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .trim-actions .cancel-btn {
+            background: #3d3d4e;
+            color: white;
+        }
+
+        .trim-actions .trim-btn {
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+        }
+
+        .trim-actions button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Scissor button on song items */
+        .trim-btn-song {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .songItem:hover .trim-btn-song {
+            opacity: 1;
+        }
+
+        /* Preview audio player in trimmer */
+        #preview_audio {
+            width: 100%;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="main_content">
+            <div class="menu_side">
+                <h1>MELODIES</h1>
+                <div class="playlist">
+                    <h1><i class="bi bi-person-circle"></i><a href="demo2.html">Profile</a></h1>
+                    <h1 class="active"><i class="bi bi-music-note"></i> Liked Music</h1> 
+                    <h1><i class="bi bi-download"></i> Downloads</h1>
+                    <h1><i class="bi bi-calendar2-heart"></i><a href="schedule songs.html">Schedule Music</a></h1>
+                    <h1><i class="bi bi-boombox-fill"></i><a href="add songs.html"> Add your songs</a></h1>
+                    <h1><i class="bi bi-music-player"></i><a href="real time music creation.html"> Real Time Music Creation</a></h1>
+                </div>
+            </div>
+            <div class="song_side">
+                <!-- Featured Singers Section -->
+                <div class="featured-singers">
+                    <h4>Famous Singers</h4>
+                    <div class="singers-container">
+                        <!-- Singer 1 -->
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="arijit.jpg" alt="Arijit Singh">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">Arijit Singh</div>
+                        </div>
+                        <!-- Singer 2 -->
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="neha kakkar.jpg" alt="Neha Kakkar">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">Neha Kakkar</div>
+                        </div>
+                        <!-- Singer 3 -->
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="Shreya ghoshal.jpg" alt="Shreya Ghoshal">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">Shreya Ghoshal</div>
+                        </div>
+                        <!-- Singer 4 -->
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="atif.jpg" alt="Atif Aslam">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">Atif Aslam</div>
+                        </div>
+                        <!-- Singer 5 -->
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="sunidhi chauhan.jpg" alt="Sunidhi Chauhan">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">Sunidhi Chauhan</div>
+                        </div>
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="darshan.jpg" alt="Sunidhi Chauhan">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">Darshan raval</div>
+                        </div>
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="90.webp" alt="Sunidhi Chauhan">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">90s superstars</div>
+                        </div>
+                        <div class="singer-card">
+                            <div class="singer-image">
+                                <img src="hollywood.webp" alt="Sunidhi Chauhan">
+                                <div class="listen-overlay">
+                                    <div class="listen-text">Listen Now</div>
+                                </div>
+                            </div>
+                            <div class="singer-name">hollywood singers</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Song Categories Tabs -->
+                <div class="song-categories">
+                    <button class="active" data-target="popular">Popular Songs</button>
+                    <button data-target="english">Old is Gold</button>
+                    <button data-target="hindi">Hindi Songs</button>
+                    <button data-target="haryanvi">Haryanvi Songs</button>
+                    <button data-target="south">South Movies Songs</button>
+                </div>
+                
+                <!-- Popular Songs Section -->
+                <div class="song-section active" id="popular">
+                    <div class="popular_song">
+                        <div class="h4">
+                            <h4>Popular Songs</h4>
+                            <div class="btn_s">
+                                <i id="left_scroll_popular" class="bi bi-arrow-left-short"></i>
+                                <i id="right_scroll_popular" class="bi bi-arrow-right-short"></i>
+                            </div>
+                        </div>
+                        <div class="pop_song" id="popular_songs">
+                            <!-- Song 1 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Chaar%20Kadam%20-%20PK%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="chaar kadam cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Chaar Kadam</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 2 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Paaro%20-%20Aditya%20Rikhari%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="paaro cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Paaro</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 3 -->
+                            <li class="songItem" data-audio="https://raag.fm/files/mp3/128/Punjabi-Singles/28781/Jhol%20-%20(Raag.Fm).mp3">
+                                <div class="img_play">
+                                    <img src="jhol cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Jhol</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 4 -->
+                            <li class="songItem" data-audio="https://raag.fm/files/mp3/128/Hindi/28811/Maand%20-%20(Raag.Fm).mp3">
+                                <div class="img_play">
+                                    <img src="maand cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Maand</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 5 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Tu%20Hain%20Toh%20-%20Mr.%20And%20Mrs.%20Mahi%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="tu hai toh cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Tu hai toh</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <br>
+                             <!-- Song 1 -->
+                             <li class="songItem" data-audio="https://pagalall.com/wp-content/uploads/Sang%20Rahiyo%20-%20Jasleen%20Royal%20(pagalall.com).mp3">
+                                <div class="img_play">
+                                    <img src="sang rahiyo copver.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Sang Rahiyo</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 2 -->
+                            <li class="songItem" data-audio="kaise abb.mp3">
+                                <div class="img_play">
+                                    <img src="gutur cover.jpeg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Kaise abb kahe</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 3 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Kaise%20Hua%20-%20Kabir%20Singh%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="kaise hua cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Kaise hua</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 4 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Pehla%20Pyaar%20-%20Kabir%20Singh%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="pehla pyaar cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Pehla Pyaar</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Song 5 -->
+                            <li class="songItem" data-audio="https://hindi2.djpunjab.app/load/LQQ9zHiKrfSXyZ1lL7DuMg==/Mast%20Magan.mp3">
+                                <div class="img_play">
+                                    <img src="mann mast magan cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Mann Mast magan</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- English Songs Section -->
+                <div class="song-section" id="english">
+                    <div class="popular_song">
+                        <div class="h4">
+                            <h4>Old is Gold</h4>
+                            <div class="btn_s">
+                                <i id="left_scroll_english" class="bi bi-arrow-left-short"></i>
+                                <i id="right_scroll_english" class="bi bi-arrow-right-short"></i>
+                            </div>
+                        </div>
+                        <div class="pop_song" id="english_songs">
+                            <!-- English Song 1 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Bahon%20Mein%20Chale%20Aao%20-%20Anamika%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="baaho cover.webp" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Baaho Me Chale Aao</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- English Song 2 -->
+                            <li class="songItem" data-audio="https://pagalnew.com/128-download/449">
+                                <div class="img_play">
+                                    <img src="jaane kaha cover.webp" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Jaane Kahan <br>Mera Jigar Gaya Ji </p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- English Song 3 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Lag%20Ja%20Gale%20Se%20Phir%20-%20Woh%20Kaun%20Thi%20%20(1964)%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="lag ja gale.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Lag Ja Gale</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- English Song 4 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Achha%20Ji%20Main%20Haari%20Chalo%20-%20Kala%20Pani%201958%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="acha ji me haari.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Acha Ji Me Haari</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- English Song 5 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Neele%20Neele%20Ambar%20Par%20(Male%20Version)%20-%20Kalaakaar%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="neele.webp" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Neele Neele Ambar Par</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hindi Songs Section -->
+                <div class="song-section" id="hindi">
+                    <div class="popular_song">
+                        <div class="h4">
+                            <h4>Hindi Songs</h4>
+                            <div class="btn_s">
+                                <i id="left_scroll_hindi" class="bi bi-arrow-left-short"></i>
+                                <i id="right_scroll_hindi" class="bi bi-arrow-right-short"></i>
+                            </div>
+                        </div>
+                        <div class="pop_song" id="hindi_songs">
+                            <!-- Hindi Song 1 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Tum%20Hi%20Ho%20-%20Aashiqui%202%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="tum he ho cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Tum Hi Ho</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Hindi Song 2 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-Channa%20Mereya%20-%20Ae%20Dil%20Hai%20Mushkil%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="chana mereya .jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Channa Mereya</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Hindi Song 3 -->
+                            <li class="songItem" data-audio="https://pagalnew.com/128-download/30350">
+                                <div class="img_play">
+                                    <img src="kesariya cover.jpeg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Kesariya</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Hindi Song 4 -->
+                            <li class="songItem" data-audio="https://pagalnew.com/128-download/19028">
+                                <div class="img_play">
+                                    <img src="rata lambiya cover.jpeg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Raatan Lambiyan</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Hindi Song 5 -->
+                            <li class="songItem" data-audio="https://pagalnew.com/128-download/1890">
+                                <div class="img_play">
+                                    <img src="shayadcover.jpeg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Shayad</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Haryanvi Songs Section -->
+                <div class="song-section" id="haryanvi">
+                    <div class="popular_song">
+                        <div class="h4">
+                            <h4>Haryanvi Songs</h4>
+                            <div class="btn_s">
+                                <i id="left_scroll_haryanvi" class="bi bi-arrow-left-short"></i>
+                                <i id="right_scroll_haryanvi" class="bi bi-arrow-right-short"></i>
+                            </div>
+                        </div>
+                        <div class="pop_song" id="haryanvi_songs">
+                            <!-- Haryanvi Song 1 -->
+                            <li class="songItem" data-audio="https://pagalfree.com/musics/128-52%20Gaj%20Ka%20Daman%20-%20Renuka%20Panwar%20128%20Kbps.mp3">
+                                <div class="img_play">
+                                    <img src="52 cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>52 Gaj Ka Daman</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Haryanvi Song 2 -->
+                            <li class="songItem" data-audio="https://pagalnew.com/128-download/4938">
+                                <div class="img_play">
+                                    <img src="loot image.jpeg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Loot Liya</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Haryanvi Song 3 -->
+                            <li class="songItem" data-audio="https://s320.djpunjab.is/data/48/49047/296570/Kala%20Jaadu%20-%20Arjan%20Dhillon.mp3">
+                                <div class="img_play">
+                                    <img src="kala cover.jpeg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Kala Jadu</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Haryanvi Song 4 -->
+                            <li class="songItem" data-audio="chora.mp3">
+                                <div class="img_play">
+                                    <img src="chora cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Chora Haryane Ka</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- Haryanvi Song 5 -->
+                            <li class="songItem" data-audio="https://cdnsongs.com/music/data/Single_Track/201612/Daru_Badnaam/128/Daru_Badnaam_1.mp3">
+                                <div class="img_play">
+                                    <img src="daaru.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Daru Badnaam</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- South Movies Songs Section -->
+                <div class="song-section" id="south">
+                    <div class="popular_song">
+                        <div class="h4">
+                            <h4>South Movies Songs</h4>
+                            <div class="btn_s">
+                                <i id="left_scroll_south" class="bi bi-arrow-left-short"></i>
+                                <i id="right_scroll_south" class="bi bi-arrow-right-short"></i>
+                            </div>
+                        </div>
+                        <div class="pop_song" id="south_songs">
+                            <!-- South Song 1 -->
+                            <li class="songItem" data-audio="https://hindi2.djpunjab.app/load/y534zuEmWMeUuiZ0Q5gJzw==/Srivalli.mp3">
+                                <div class="img_play">
+                                    <img src="srivalli cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Srivalli</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- South Song 2 -->
+                            <li class="songItem" data-audio="antava.mp3">
+                                <div class="img_play">
+                                    <img src="antava cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Oo Antava</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- South Song 3 -->
+                            <li class="songItem" data-audio="sami.mp3">
+                                <div class="img_play">
+                                    <img src="saami cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Saami Saami</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- South Song 4 -->
+                            <li class="songItem" data-audio="darshana.mp3">
+                                <div class="img_play">
+                                    <img src="darshana cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Darshana</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                            <!-- South Song 5 -->
+                            <li class="songItem" data-audio="butta.mp3">
+                                <div class="img_play">
+                                    <img src="butta cover.jpg" alt="Song Cover">
+                                    <div class="play_btn"><i class="bi bi-play-fill"></i></div>
+                                    <button class="trim-btn-song" title="Trim Audio"><i class="bi bi-scissors"></i></button>
+                                </div>
+                                <p>Butta Bomma</p>
+                                <div class="now_playing">NOW PLAYING</div>
+                            </li>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="master_play">
+            <audio id="current_audio" controls></audio>
+        </div>
+    </header>
+
+    <!-- Audio Trimmer Modal -->
+    <div class="modal-overlay" id="trimModal">
+        <div class="trim-modal">
+            <h2><i class="bi bi-scissors"></i> Trim Audio</h2>
+            
+            <audio id="preview_audio" controls></audio>
+            
+            <div class="trim-controls">
+                <div class="range-container">
+                    <label>Start:</label>
+                    <input type="range" id="startRange" min="0" max="100" value="0">
+                </div>
+                <div class="range-container">
+                    <label>End:</label>
+                    <input type="range" id="endRange" min="0" max="100" value="100">
+                </div>
+                <div class="time-display">
+                    <span id="startTime">0:00</span> - <span id="endTime">0:00</span>
+                    (Duration: <span id="durationTime">0:00</span>)
+                </div>
+            </div>
+            
+            <div class="trim-actions">
+                <button class="cancel-btn" id="cancelTrim">Cancel</button>
+                <button class="trim-btn" id="applyTrim">Apply & Add to Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add click effect to playlist items
+        const playlistItems = document.querySelectorAll('.playlist h1');
+        playlistItems.forEach(item => {
+            item.addEventListener('click', function() {
+                playlistItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Song player functionality
+        const audioPlayer = document.getElementById('current_audio');
+        const songItems = document.querySelectorAll('.songItem');
+        let currentlyPlaying = null;
+
+        songItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Don't trigger if clicking the trim button
+                if (e.target.closest('.trim-btn-song')) return;
+                
+                const audioSrc = this.getAttribute('data-audio');
+                
+                // If this song is already playing, pause it
+                if (currentlyPlaying === this) {
+                    audioPlayer.pause();
+                    this.classList.remove('playing');
+                    currentlyPlaying = null;
+                    return;
+                }
+                
+                // Otherwise, play the new song
+                if (currentlyPlaying) {
+                    currentlyPlaying.classList.remove('playing');
+                }
+                
+                audioPlayer.src = audioSrc;
+                audioPlayer.play()
+                    .then(() => {
+                        this.classList.add('playing');
+                        currentlyPlaying = this;
+                        
+                        // Show now playing indicator
+                        const nowPlaying = this.querySelector('.now_playing');
+                        nowPlaying.style.display = 'block';
+                        
+                        // Hide other now playing indicators
+                        document.querySelectorAll('.now_playing').forEach(el => {
+                            if (el !== nowPlaying) el.style.display = 'none';
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error playing audio:', error);
+                        alert('Error playing audio. Please try another song.');
+                    });
+            });
+        });
+
+        // Audio events to handle playback state
+        audioPlayer.addEventListener('play', function() {
+            if (currentlyPlaying) {
+                currentlyPlaying.classList.add('playing');
+            }
+        });
+
+        audioPlayer.addEventListener('pause', function() {
+            if (currentlyPlaying) {
+                currentlyPlaying.classList.remove('playing');
+            }
+        });
+
+        audioPlayer.addEventListener('ended', function() {
+            if (currentlyPlaying) {
+                currentlyPlaying.classList.remove('playing');
+                currentlyPlaying = null;
+            }
+        });
+
+        // Singer card click functionality
+        const singerCards = document.querySelectorAll('.singer-card');
+        singerCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const singerName = this.querySelector('.singer-name').textContent;
+                alert('Playing songs by ${singerName}');
+
+                // In a real app, you would load the singer's songs here
+            });
+        });
+
+        // Song category tabs functionality
+        const categoryTabs = document.querySelectorAll('.song-categories button');
+        const songSections = document.querySelectorAll('.song-section');
+
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                
+                // Update active tab
+                categoryTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding section
+                songSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // Audio Trimmer Functionality
+        const trimModal = document.getElementById('trimModal');
+        const previewAudio = document.getElementById('preview_audio');
+        const startRange = document.getElementById('startRange');
+        const endRange = document.getElementById('endRange');
+        const startTime = document.getElementById('startTime');
+        const endTime = document.getElementById('endTime');
+        const durationTime = document.getElementById('durationTime');
+        const cancelTrimBtn = document.getElementById('cancelTrim');
+        const applyTrimBtn = document.getElementById('applyTrim');
+        const trimButtons = document.querySelectorAll('.trim-btn-song');
+
+        let currentAudioSrc = '';
+        let currentSongName = '';
+        let currentCoverImage = '';
+        let audioDuration = 0;
+
+        // Format time from seconds to MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+        }
+
+        // Open trim modal
+        trimButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const songItem = this.closest('.songItem');
+                currentAudioSrc = songItem.getAttribute('data-audio');
+                currentSongName = songItem.querySelector('p').textContent;
+                currentCoverImage = songItem.querySelector('img').src;
+                
+                previewAudio.src = currentAudioSrc;
+                trimModal.style.display = 'flex';
+                
+                // Reset ranges
+                startRange.value = 0;
+                endRange.value = 100;
+                
+                // Wait for audio metadata to load
+                previewAudio.onloadedmetadata = function() {
+                    audioDuration = previewAudio.duration;
+                    durationTime.textContent = formatTime(audioDuration);
+                    endTime.textContent = formatTime(audioDuration);
+                };
+            });
+        });
+
+        // Update time displays when ranges change
+        startRange.addEventListener('input', function() {
+            const startValue = (this.value / 100) * audioDuration;
+            startTime.textContent = formatTime(startValue);
+            
+            // Ensure start is before end
+            if (parseInt(this.value) >= parseInt(endRange.value)) {
+                this.value = endRange.value - 1;
+            }
+            
+            // Preview the audio at the start point
+            previewAudio.currentTime = startValue;
+        });
+
+        endRange.addEventListener('input', function() {
+            const endValue = (this.value / 100) * audioDuration;
+            endTime.textContent = formatTime(endValue);
+            
+            // Ensure end is after start
+            if (parseInt(this.value) <= parseInt(startRange.value)) {
+                this.value = parseInt(startRange.value) + 1;
+            }
+        });
+
+        // Cancel trimming
+        cancelTrimBtn.addEventListener('click', function() {
+            trimModal.style.display = 'none';
+            previewAudio.pause();
+        });
+
+        // Apply trimming and add to playlist
+        applyTrimBtn.addEventListener('click', function() {
+            const startValue = (startRange.value / 100) * audioDuration;
+            const endValue = (endRange.value / 100) * audioDuration;
+            
+            // In a real app, you would:
+            // 1. Use the Web Audio API to actually trim the audio
+            // 2. Save the trimmed audio (either to server or localStorage)
+            // 3. Add the new trimmed version to your playlist
+            
+            // For this demo, we'll just add a new item with the trim info
+            const playlist = document.querySelector('.playlist h1.active');
+            if (playlist) {
+                // Create a new playlist item
+                const newPlaylistItem = document.createElement('h1');
+                newPlaylistItem.innerHTML = `<i class="bi bi-scissors"></i> ${currentSongName} (Trimmed)`;
+
+                // Insert after the active playlist item
+                playlist.parentNode.insertBefore(newPlaylistItem, playlist.nextSibling);
+                
+                // Show success message
+                alert(`Audio trimmed from ${formatTime(startValue)} to ${formatTime(endValue)} and added to playlist!`);
+            }
+            
+            // Close modal
+            trimModal.style.display = 'none';
+            previewAudio.pause();
+        });
+
+        // Close modal when clicking outside
+        trimModal.addEventListener('click', function(e) {
+            if (e.target === trimModal) {
+                trimModal.style.display = 'none';
+                previewAudio.pause();
+            }
+        });
+
+        // Horizontal scrolling for all song sections
+        function setupHorizontalScrolling(containerId, leftBtnId, rightBtnId) {
+            const container = document.getElementById(containerId);
+            const leftBtn = document.getElementById(leftBtnId);
+            const rightBtn = document.getElementById(rightBtnId);
+
+            if (leftBtn && rightBtn && container) {
+                leftBtn.addEventListener('click', () => {
+                    container.scrollBy({ left: -200, behavior: 'smooth' });
+                });
+
+                rightBtn.addEventListener('click', () => {
+                    container.scrollBy({ left: 200, behavior: 'smooth' });
+                });
+            }
+        }
+
+        // Setup scrolling for all sections
+        setupHorizontalScrolling('popular_songs', 'left_scroll_popular', 'right_scroll_popular');
+        setupHorizontalScrolling('english_songs', 'left_scroll_english', 'right_scroll_english');
+        setupHorizontalScrolling('hindi_songs', 'left_scroll_hindi', 'right_scroll_hindi');
+        setupHorizontalScrolling('haryanvi_songs', 'left_scroll_haryanvi', 'right_scroll_haryanvi');
+        setupHorizontalScrolling('south_songs', 'left_scroll_south', 'right_scroll_south');
+    </script>
+</body>
+</html>
