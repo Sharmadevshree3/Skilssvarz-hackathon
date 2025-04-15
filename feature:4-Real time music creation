@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Mashup Creator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url(rm4.gif);
+            color: #0b0b0b;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fcfcfc;
+            margin-bottom: 30px;
+            background-color: #0b0b0b;
+        }
+        
+        .upload-section {
+            background-color: #f2f2f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+
+        .track-library {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .track {
+            background-color: #eaedf1;
+            padding: 15px;
+            border-radius: 8px;
+            width: calc(33% - 15px);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .track:hover {
+            transform: scale(1.03);
+            background-color: #1a3a6a;
+        }
+        
+        .track h3 {
+            margin-top: 0;
+            color: #4e66fd;
+        }
+        
+        .waveform {
+            height: 60px;
+            background-color: #2d3748;
+            margin: 10px 0;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .waveform canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        button {
+            background-color: #2533f7;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #5ad3e3;
+        }
+        
+        .timeline {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-container {
+            height: 100px;
+            background-color: #a7bcdf;
+            border-radius: 5px;
+            position: relative;
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin: 20px 0;
+        }
+        
+        .track-segment {
+            height: 60px;
+            background-color: #4cf0d5;
+            border-radius: 5px;
+            position: absolute;
+            top: 20px;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: #1a1a2e;
+            font-weight: bold;
+            user-select: none;
+        }
+        
+        .playback-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .playback-controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        
+        #exportBtn {
+            background-color: #4cc9f0;
+        }
+        
+        #exportBtn:hover {
+            background-color: #3aa8d8;
+        }
+        
+        .time-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: rgb(0, 42, 255);
+            z-index: 10;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-Time Music Mashup Creator</h1>
+        
+        <div class="upload-section">
+            <h2>Upload Your Tracks</h2>
+            <input type="file" id="fileUpload" accept="audio/*" multiple>
+            <button id="uploadBtn">Upload</button>
+        </div>
+        
+        <h1>Track Library</h1>
+        <div class="track-library" id="trackLibrary"></div>
+        
+        <div class="timeline">
+            <h2>Mashup Timeline</h2>
+            <div class="timeline-container" id="timeline">
+                <div class="time-indicator" id="timeIndicator"></div>
+            </div>
+            <div class="playback-controls">
+                <button id="playBtn">Play</button>
+                <button id="pauseBtn">Pause</button>
+                <button id="stopBtn">Stop</button>
+                <button id="exportBtn">Export Mashup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let tracks = [];
+        let activeSegments = [];
+        let isPlaying = false;
+        let startTime = 0;
+        let timelineStart = 0;
+        let currentPlayPosition = 0;
+        let animationFrameId = null;
+        
+        // DOM elements
+        const trackLibrary = document.getElementById('trackLibrary');
+        const timeline = document.getElementById('timeline');
+        const timeIndicator = document.getElementById('timeIndicator');
+        const fileUpload = document.getElementById('fileUpload');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        
+        // Event listeners
+        uploadBtn.addEventListener('click', handleUpload);
+        playBtn.addEventListener('click', playMashup);
+        pauseBtn.addEventListener('click', pauseMashup);
+        stopBtn.addEventListener('click', stopMashup);
+        exportBtn.addEventListener('click', exportMashup);
+        
+        // Sample tracks (you can remove these when you have your own uploads)
+        const sampleTracks = [
+            { name: "Pop Beat", url: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" },
+            { name: "Jazz Loop", url: "https://assets.mixkit.co/music/preview/mixkit-soul-groove-21.mp3" },
+            { name: "Rock Riff", url: "https://assets.mixkit.co/music/preview/mixkit-rock-guitar-49.mp3" },
+            { name: "Electronic", url: "https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3" }
+        ];
+        
+        // Initialize with sample tracks
+        window.addEventListener('DOMContentLoaded', () => {
+            sampleTracks.forEach(track => {
+                loadTrack(track.name, track.url);
+            });
+        });
+        
+        // Functions
+        async function handleUpload() {
+            const files = fileUpload.files;
+            if (files.length === 0) return;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const arrayBuffer = await file.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                const track = {
+                    name: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+                    audioBuffer: audioBuffer,
+                    url: URL.createObjectURL(file)
+                };
+                
+                tracks.push(track);
+                createTrackElement(track);
+            }
+        }
+        
+        async function loadTrack(name, url) {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                const track = {
+                    name: name,
+                    audioBuffer: audioBuffer,
+                    url: url
+                };
+                
+                tracks.push(track);
+                createTrackElement(track);
+            } catch (error) {
+                console.error("Error loading track:", error);
+            }
+        }
+        
+        function createTrackElement(track) {
+            const trackElement = document.createElement('div');
+            trackElement.className = 'track';
+            trackElement.draggable = true;
+            trackElement.dataset.trackId = tracks.length - 1;
+            
+            trackElement.innerHTML = `
+                <h3>${track.name}</h3>
+                <div class="waveform">
+                    <canvas></canvas>
+                </div>
+                <div class="controls">
+                    <button class="play-btn">Play</button>
+                    <button class="add-btn">Add to Timeline</button>
+                    <div class="volume-control">
+                        <span>Vol:</span>
+                        <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider">
+                    </div>
+                </div>
+            `;
+            
+            // Draw waveform
+            const canvas = trackElement.querySelector('canvas');
+            drawWaveform(canvas, track.audioBuffer);
+            
+            // Add event listeners
+            trackElement.querySelector('.play-btn').addEventListener('click', () => playTrack(track));
+            trackElement.querySelector('.add-btn').addEventListener('click', () => addToTimeline(track));
+            
+            trackElement.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', trackElement.dataset.trackId);
+            });
+            
+            trackLibrary.appendChild(trackElement);
+        }
+        
+        function drawWaveform(canvas, audioBuffer) {
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = canvas.offsetHeight;
+            const ctx = canvas.getContext('2d');
+            
+            const data = audioBuffer.getChannelData(0);
+            const step = Math.ceil(data.length / width);
+            const amp = height / 2;
+            
+            ctx.fillStyle = '#4cc9f0';
+            ctx.strokeStyle = '#4cc9f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            
+            for (let i = 0; i < width; i++) {
+                const min = 1.0;
+                const max = -1.0;
+                
+                for (let j = 0; j < step; j++) {
+                    const datum = data[(i * step) + j];
+                    if (datum < min) min = datum;
+                    if (datum > max) max = datum;
+                }
+                
+                ctx.moveTo(i, (1 + min) * amp);
+                ctx.lineTo(i, (1 + max) * amp);
+            }
+            
+            ctx.stroke();
+        }
+        
+        function playTrack(track) {
+            const source = audioContext.createBufferSource();
+            source.buffer = track.audioBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+            
+            source.onended = () => {
+                source.disconnect();
+            };
+        }
+        
+        function addToTimeline(track) {
+            const trackId = tracks.indexOf(track);
+            if (trackId === -1) return;
+            
+            const segment = document.createElement('div');
+            segment.className = 'track-segment';
+            segment.textContent = track.name;
+            segment.dataset.trackId = trackId;
+            segment.style.left = '0px';
+            segment.style.width = '200px';
+            
+            // Make segment draggable
+            let isDragging = false;
+            let offsetX = 0;
+            
+            segment.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - segment.getBoundingClientRect().left;
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const timelineRect = timeline.getBoundingClientRect();
+                let newLeft = e.clientX - timelineRect.left - offsetX;
+                
+                // Constrain to timeline boundaries
+                newLeft = Math.max(0, newLeft);
+                newLeft = Math.min(timelineRect.width - segment.offsetWidth, newLeft);
+                
+                segment.style.left = `${newLeft}px`;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            
+            // Make segment resizable
+            const resizeHandle = document.createElement('div');
+            resizeHandle.style.width = '10px';
+            resizeHandle.style.height = '100%';
+            resizeHandle.style.position = 'absolute';
+            resizeHandle.style.right = '0';
+            resizeHandle.style.cursor = 'ew-resize';
+            resizeHandle.style.backgroundColor = 'rgba(0,0,0,0.2)';
+            
+            let isResizing = false;
+            let startWidth = 0;
+            let startX = 0;
+            
+            resizeHandle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startWidth = segment.offsetWidth;
+                startX = e.clientX;
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                
+                const widthChange = e.clientX - startX;
+                const newWidth = Math.max(50, startWidth + widthChange);
+                
+                // Constrain to timeline boundaries
+                const segmentLeft = parseInt(segment.style.left);
+                const timelineWidth = timeline.offsetWidth;
+                if (segmentLeft + newWidth > timelineWidth) {
+                    segment.style.width = `${timelineWidth - segmentLeft}px`;
+                } else {
+                    segment.style.width = `${newWidth}px`;
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isResizing = false;
+            });
+            
+            segment.appendChild(resizeHandle);
+            timeline.appendChild(segment);
+            
+            // Add to active segments array
+            activeSegments.push({
+                element: segment,
+                trackId: trackId,
+                startTime: 0,
+                duration: track.audioBuffer.duration
+            });
+        }
+        
+        function playMashup() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            startTime = audioContext.currentTime - currentPlayPosition;
+            timelineStart = Date.now() - currentPlayPosition * 1000;
+            
+            // Stop any currently playing sources
+            stopAllAudio();
+            
+            // Play all segments
+            activeSegments.forEach(segment => {
+                const track = tracks[segment.trackId];
+                if (!track) return;
+                
+                const element = segment.element;
+                const left = parseInt(element.style.left);
+                const width = parseInt(element.style.width);
+                
+                // Calculate position in seconds (assuming 100px = 1 second for simplicity)
+                const startPos = left / 100;
+                const duration = width / 100;
+                
+                // Only play if the current play position is within this segment
+                if (currentPlayPosition >= startPos && currentPlayPosition < startPos + duration) {
+                    const source = audioContext.createBufferSource();
+                    source.buffer = track.audioBuffer;
+                    source.connect(audioContext.destination);
+                    
+                    // Calculate offset into the track
+                    const trackOffset = (currentPlayPosition - startPos) / duration * track.audioBuffer.duration;
+                    const playDuration = duration - (currentPlayPosition - startPos);
+                    
+                    source.start(startTime, trackOffset, playDuration);
+                    segment.source = source;
+                } else if (currentPlayPosition < startPos) {
+                    // Schedule to play in the future
+                    const source = audioContext.createBufferSource();
+                    source.buffer = track.audioBuffer;
+                    source.connect(audioContext.destination);
+                    
+                    const playTime = startTime + startPos - currentPlayPosition;
+                    source.start(playTime, 0, duration);
+                    segment.source = source;
+                }
+            });
+            
+            // Start animation for time indicator
+            updateTimeIndicator();
+        }
+        
+        function pauseMashup() {
+            if (!isPlaying) return;
+            
+            isPlaying = false;
+            currentPlayPosition = (Date.now() - timelineStart) / 1000;
+            
+            // Stop all audio sources but remember their positions
+            stopAllAudio();
+            
+            // Cancel animation
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+        
+        function stopMashup() {
+            isPlaying = false;
+            currentPlayPosition = 0;
+            
+            // Stop all audio sources
+            stopAllAudio();
+            
+            // Reset time indicator
+            timeIndicator.style.left = '0px';
+            
+            // Cancel animation
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+        
+        function stopAllAudio() {
+            activeSegments.forEach(segment => {
+                if (segment.source) {
+                    segment.source.stop();
+                    segment.source.disconnect();
+                    segment.source = null;
+                }
+            });
+        }
+        
+        function updateTimeIndicator() {
+            if (!isPlaying) return;
+            
+            currentPlayPosition = (Date.now() - timelineStart) / 1000;
+            const positionPx = currentPlayPosition * 100;
+            
+            timeIndicator.style.left =`${positionPx}px`;
+            
+            // Check if we've reached the end of the timeline
+            if (positionPx > timeline.offsetWidth) {
+                stopMashup();
+                return;
+            }
+            
+            animationFrameId = requestAnimationFrame(updateTimeIndicator);
+        }
+        
+        function exportMashup() {
+            if (activeSegments.length === 0) {
+                alert("No segments in the timeline to export!");
+                return;
+            }
+            
+            alert("Mashup export would be implemented here. In a real app, this would:\n" +
+                 "1. Combine all audio segments in the timeline\n" +
+                 "2. Process them with the Web Audio API OfflineAudioContext\n" +
+                 "3. Encode the result to an audio file (WAV/MP3)\n" +
+                 "4. Provide a download link to the user");
+        }
+        
+        // Allow dropping tracks onto the timeline
+        timeline.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        timeline.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const trackId = e.dataTransfer.getData('text/plain');
+            const track = tracks[trackId];
+            if (track) {
+                addToTimeline(track);
+            }
+        });
+    </script>
+</body>
+</html>
