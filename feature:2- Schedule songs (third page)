@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player with Friend Features</title>
+    <style>
+        /* Internal CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-image: url(Loop\ Motion\ GIF\ by\ Trakto.gif);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #fafafa;
+            height: 20px;
+            width: 20px;
+            margin-bottom: 10px;
+            background-color: black;
+            align-items: center;
+        }
+        header p{
+            color: #e3f2fd;
+            background-color: black;
+        }
+
+        .player-container {
+            background-color: rgb(247, 249, 251);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .album-art {
+            width: 100px;
+            height: 100px;
+            border-radius: 5px;
+            margin-right: 20px;
+            object-fit: cover;
+        }
+
+        .song-info h3 {
+            margin-bottom: 5px;
+        }
+
+        .song-info p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 5px;
+            width: 0%;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-success {
+            background-color: #2ecc71;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .playlist {
+            margin-top: 20px;
+        }
+
+        .playlist h3 {
+            margin-bottom: 10px;
+        }
+
+        .song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ecf0f1;
+            cursor: pointer;
+        }
+
+        .song-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .song-item.active {
+            background-color: #e3f2fd;
+        }
+
+        .schedule-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .schedule-form, .friends-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            flex: 1;
+        }
+
+        .schedule-form h3, .friends-container h3 {
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="datetime-local"], 
+        select,
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .scheduled-events {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            flex: 1;
+        }
+
+        .event-item {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #3498db;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .friend-list {
+            margin-top: 15px;
+        }
+
+        .friend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .friend-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .friend-item input {
+            margin-right: 10px;
+        }
+
+        .friend-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .friend-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .friend-actions button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .search-friends {
+            margin-bottom: 15px;
+        }
+
+        .pending-requests {
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-accepted {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .status-declined {
+            background-color: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h2>Song Scheduler</h2>
+            <p>Listen, schedule, and share music with friends</p>
+        </header>
+
+        <div class="player-container">
+            <div class="now-playing">
+                <img src="https://via.placeholder.com/100" alt="Album Art" class="album-art" id="album-art">
+                <div class="song-info">
+                    <h3 id="song-title">No song selected</h3>
+                    <p id="song-artist">-</p>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <div class="time-info">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="prev-btn">Previous</button>
+                <button id="play-btn">Play</button>
+                <button id="next-btn">Next</button>
+            </div>
+
+            <div class="playlist">
+                <h3>Playlist</h3>
+                <div id="song-list">
+                    <!-- Songs will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="schedule-section">
+            <div class="schedule-form">
+                <div class="tabs">
+                    <div class="tab active" data-tab="self">For Yourself</div>
+                    <div class="tab" data-tab="friend">For Friends</div>
+                    <div class="tab" data-tab="friends-manage">Friends</div>
+                </div>
+
+                <div class="tab-content active" id="self-tab">
+                    <h3>Schedule Music for Yourself</h3>
+                    <div class="form-group">
+                        <label for="schedule-song">Select Song</label>
+                        <select id="schedule-song">
+                            <!-- Options will be added by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="schedule-time">Date & Time</label>
+                        <input type="datetime-local" id="schedule-time">
+                    </div>
+                    <button id="add-schedule">Schedule Playback</button>
+                </div>
+
+                <div class="tab-content" id="friend-tab">
+                    <h3>Schedule Music for Friends</h3>
+                    <div class="form-group">
+                        <label for="friend-schedule-song">Select Song</label>
+                        <select id="friend-schedule-song">
+                            <!-- Options will be added by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="friend-schedule-time">Date & Time</label>
+                        <input type="datetime-local" id="friend-schedule-time">
+                    </div>
+                    <div class="form-group">
+                        <label>Select Friends</label>
+                        <div class="friend-list" id="friend-list">
+                            <!-- Friends will be added here -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="friend-message">Personal Message (optional)</label>
+                        <input type="text" id="friend-message" placeholder="Add a personal message">
+                    </div>
+                    <button id="add-friend-schedule">Schedule for Friends</button>
+                </div>
+
+                <div class="tab-content" id="friends-manage-tab">
+                    <h3>Manage Friends</h3>
+                    <button id="add-friend-btn">Add New Friend</button>
+                    
+                    <div class="pending-requests">
+                        <h4>Pending Friend Requests</h4>
+                        <div id="pending-requests-list">
+                            <!-- Pending requests will be shown here -->
+                        </div>
+                    </div>
+                    
+                    <div class="friend-list">
+                        <h4>Your Friends</h4>
+                        <div id="your-friends-list">
+                            <!-- Friends list will be shown here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scheduled-events">
+                <div class="tabs">
+                    <div class="tab active" data-tab="self-events">Your Scheduled</div>
+                    <div class="tab" data-tab="friend-events">Friend Requests</div>
+                </div>
+
+                <div class="tab-content active" id="self-events-tab">
+                    <h3>Your Scheduled Playbacks</h3>
+                    <div id="scheduled-list">
+                        <!-- Scheduled events will be added here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="friend-events-tab">
+                    <h3>Playbacks Scheduled for You</h3>
+                    <div id="friend-scheduled-list">
+                        <!-- Friend scheduled events will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Friend Modal -->
+    <div class="modal" id="add-friend-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Friend</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="search-friends">
+                <div class="form-group">
+                    <label for="search-email">Search by Email</label>
+                    <input type="email" id="search-email" placeholder="Enter friend's email">
+                </div>
+                <button id="search-friend-btn">Search</button>
+            </div>
+            <div id="search-results">
+                <!-- Search results will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Internal JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample music library
+            const musicLibrary = [
+                {
+                    title: "Chaar Kadam",
+                    artist: "Arjit Singh",
+                    src: "128-Chaar Kadam - PK 128 Kbps.mp3",
+                    cover: "char kadam.jpg"
+                },
+                {
+                    title: "Kya baat hai",
+                    artist: "Harrdy Sandhu",
+                    src: "Kya Baat Ay Harrdy Sandhu 128 Kbps (1).mp3",
+                    cover: "kya baat h.jpeg"
+                },
+                {
+                    title: "Vaaste",
+                    artist: "Dhvani Bhanushali",
+                    src: "Vaaste Nikhil Dsouza 128 Kbps.mp3",
+                    cover: "vaste.jpeg"
+                },
+                {
+                    title: "Viah",
+                    artist: "Nikk",
+                    src: "Viah_1.mp3",
+                    cover: "viah.jpeg"
+                }
+            ];
+
+            // Sample users database (simulating a backend)
+            const usersDatabase = [
+                { id: 100, name: "Alex Johnson", email: "alex@example.com", avatar: "https://via.placeholder.com/40/3498db/FFFFFF?text=A" },
+                { id: 101, name: "Sarah Williams", email: "sarah@example.com", avatar: "https://via.placeholder.com/40/e74c3c/FFFFFF?text=S" },
+                { id: 102, name: "Michael Brown", email: "michael@example.com", avatar: "https://via.placeholder.com/40/2ecc71/FFFFFF?text=M" },
+                { id: 103, name: "Emily Davis", email: "emily@example.com", avatar: "https://via.placeholder.com/40/f39c12/FFFFFF?text=E" },
+                { id: 104, name: "David Wilson", email: "david@example.com", avatar: "https://via.placeholder.com/40/9b59b6/FFFFFF?text=D" },
+                { id: 105, name: "Jessica Taylor", email: "jessica@example.com", avatar: "https://via.placeholder.com/40/1abc9c/FFFFFF?text=J" }
+            ];
+
+            // Current user (simulating logged in user)
+            const currentUser = { 
+                id: 1, 
+                name: "You", 
+                email: "you@example.com",
+                friends: [
+                    { id: 100, name: "Alex Johnson", email: "alex@example.com", status: "accepted" },
+                    { id: 101, name: "Sarah Williams", email: "sarah@example.com", status: "accepted" },
+                    { id: 102, name: "Michael Brown", email: "michael@example.com", status: "pending", requestedBy: "them" },
+                    { id: 103, name: "Emily Davis", email: "emily@example.com", status: "pending", requestedBy: "me" }
+                ]
+            };
+
+            // Player elements
+            const audio = new Audio();
+            const playBtn = document.getElementById('play-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const progress = document.getElementById('progress');
+            const currentTimeEl = document.getElementById('current-time');
+            const durationEl = document.getElementById('duration');
+            const songTitleEl = document.getElementById('song-title');
+            const songArtistEl = document.getElementById('song-artist');
+            const albumArtEl = document.getElementById('album-art');
+            const songListEl = document.getElementById('song-list');
+            
+            // Scheduling elements
+            const scheduleSongEl = document.getElementById('schedule-song');
+            const scheduleTimeEl = document.getElementById('schedule-time');
+            const addScheduleBtn = document.getElementById('add-schedule');
+            const scheduledListEl = document.getElementById('scheduled-list');
+            
+            // Friend scheduling elements
+            const friendScheduleSongEl = document.getElementById('friend-schedule-song');
+            const friendScheduleTimeEl = document.getElementById('friend-schedule-time');
+            const friendListEl = document.getElementById('friend-list');
+            const friendMessageEl = document.getElementById('friend-message');
+            const addFriendScheduleBtn = document.getElementById('add-friend-schedule');
+            const friendScheduledListEl = document.getElementById('friend-scheduled-list');
+            
+            // Friends management elements
+            const addFriendBtn = document.getElementById('add-friend-btn');
+            const pendingRequestsList = document.getElementById('pending-requests-list');
+            const yourFriendsList = document.getElementById('your-friends-list');
+            const addFriendModal = document.getElementById('add-friend-modal');
+            const closeModalBtn = document.querySelector('.close-modal');
+            const searchEmailInput = document.getElementById('search-email');
+            const searchFriendBtn = document.getElementById('search-friend-btn');
+            const searchResultsDiv = document.getElementById('search-results');
+            
+            // Tab elements
+            const tabs = document.querySelectorAll('.tab');
+            const notificationEl = document.getElementById('notification');
+
+            // Player state
+            let currentSongIndex = 0;
+            let isPlaying = false;
+            let scheduledEvents = [];
+            let friendScheduledEvents = [];
+
+            // Initialize the player
+            function initPlayer() {
+                // Populate playlist
+                musicLibrary.forEach((song, index) => {
+                    const songItem = document.createElement('div');
+                    songItem.className = 'song-item';
+                    songItem.innerHTML = `
+                        <div>
+                            <strong>${song.title}</strong>
+                            <span> - ${song.artist}</span>
+                        </div>
+                        <span>${formatTime(180)}</span> <!-- Assuming all songs are 3 minutes for demo -->
+                    `;
+                    songItem.addEventListener('click', () => loadSong(index));
+                    songListEl.appendChild(songItem);
+
+                    // Add to schedule dropdowns
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${song.title} - ${song.artist}`;
+                    scheduleSongEl.appendChild(option.cloneNode(true));
+                    friendScheduleSongEl.appendChild(option.cloneNode(true));
+                });
+
+                // Load first song
+                loadSong(0);
+
+                // Load any saved events from localStorage
+                loadSavedEvents();
+
+                // Initialize friends lists
+                renderFriendsLists();
+            }
+
+            // Load a song
+            function loadSong(index) {
+                currentSongIndex = index;
+                const song = musicLibrary[index];
+                
+                songTitleEl.textContent = song.title;
+                songArtistEl.textContent = song.artist;
+                albumArtEl.src = song.cover;
+                audio.src = song.src;
+                
+                // Update active song in playlist
+                const songItems = document.querySelectorAll('.song-item');
+                songItems.forEach(item => item.classList.remove('active'));
+                songItems[index].classList.add('active');
+
+                if (isPlaying) {
+                    audio.play();
+                    playBtn.textContent = 'Pause';
+                }
+            }
+
+            // Play/pause toggle
+            function togglePlay() {
+                if (isPlaying) {
+                    audio.pause();
+                    playBtn.textContent = 'Play';
+                } else {
+                    audio.play();
+                    playBtn.textContent = 'Pause';
+                }
+                isPlaying = !isPlaying;
+            }
+
+            // Previous song
+            function prevSong() {
+                currentSongIndex--;
+                if (currentSongIndex < 0) {
+                    currentSongIndex = musicLibrary.length - 1;
+                }
+                loadSong(currentSongIndex);
+            }
+
+            // Next song
+            function nextSong() {
+                currentSongIndex++;
+                if (currentSongIndex >= musicLibrary.length) {
+                    currentSongIndex = 0;
+                }
+                loadSong(currentSongIndex);
+            }
+
+            // Update progress bar
+            function updateProgress(e) {
+                const { duration, currentTime } = e.srcElement;
+                const progressPercent = (currentTime / duration) * 100;
+                progress.style.width = `${progressPercent}%`;
+                currentTimeEl.textContent = formatTime(currentTime);
+                durationEl.textContent = formatTime(duration);
+            }
+
+            // Set progress when clicked on progress bar
+            function setProgress(e) {
+                const width = this.clientWidth;
+                const clickX = e.offsetX;
+                const duration = audio.duration;
+                audio.currentTime = (clickX / width) * duration;
+            }
+
+            // Format time in mm:ss
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return '0:00';
+                
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
+            // Add scheduled playback for yourself
+            function addScheduledPlayback() {
+                const songIndex = parseInt(scheduleSongEl.value);
+                const datetime = scheduleTimeEl.value;
+                
+                if (!datetime) {
+                    showNotification('Please select a date and time', 'error');
+                    return;
+                }
+                
+                const scheduledTime = new Date(datetime).getTime();
+                const now = new Date().getTime();
+                
+                if (scheduledTime <= now) {
+                    showNotification('Please select a future time', 'error');
+                    return;
+                }
+                
+                const event = {
+                    songIndex,
+                    time: scheduledTime,
+                    id: Date.now(), // Use timestamp as unique ID
+                    type: 'self'
+                };
+                
+                scheduledEvents.push(event);
+                saveEvents();
+                renderScheduledEvents();
+                
+                // Set timeout for this event
+                const timeout = scheduledTime - now;
+                setTimeout(() => {
+                    loadSong(songIndex);
+                    if (!isPlaying) togglePlay();
+                    // Remove the event after triggering
+                    scheduledEvents = scheduledEvents.filter(e => e.id !== event.id);
+                    saveEvents();
+                    renderScheduledEvents();
+                    showNotification(`Now playing: ${musicLibrary[songIndex].title}`, 'success');
+                }, timeout);
+                
+                showNotification('Playback scheduled successfully!', 'success');
+                scheduleTimeEl.value = '';
+            }
+
+            // Add scheduled playback for friends
+            function addFriendScheduledPlayback() {
+                const songIndex = parseInt(friendScheduleSongEl.value);
+                const datetime = friendScheduleTimeEl.value;
+                const message = friendMessageEl.value;
+                
+                if (!datetime) {
+                    showNotification('Please select a date and time', 'error');
+                    return;
+                }
+                
+                const scheduledTime = new Date(datetime).getTime();
+                const now = new Date().getTime();
+                
+                if (scheduledTime <= now) {
+                    showNotification('Please select a future time', 'error');
+                    return;
+                }
+                
+                // Get selected friends
+                const selectedFriends = [];
+                document.querySelectorAll('#friend-list input[type="checkbox"]:checked').forEach(checkbox => {
+                    const friendId = parseInt(checkbox.value);
+                    const friend = currentUser.friends.find(f => f.id === friendId && f.status === 'accepted');
+                    if (friend) selectedFriends.push(friend);
+                });
+                
+                if (selectedFriends.length === 0) {
+                    showNotification('Please select at least one friend', 'error');
+                    return;
+                }
+                
+                // Create events for each friend
+                selectedFriends.forEach(friend => {
+                    const event = {
+                        songIndex,
+                        time: scheduledTime,
+                        id: Date.now() + friend.id, // Unique ID
+                        type: 'friend',
+                        friendId: friend.id,
+                        friendName: friend.name,
+                        friendEmail: friend.email,
+                        sender: currentUser.name,
+                        senderId: currentUser.id,
+                        message: message,
+                        status: 'pending'
+                    };
+                    
+                    friendScheduledEvents.push(event);
+                });
+                
+                saveEvents();
+                renderFriendScheduledEvents();
+                
+                showNotification(`Scheduled playback for ${selectedFriends.length} friend(s)`, 'success');
+                friendScheduleTimeEl.value = '';
+                friendMessageEl.value = '';
+                // Uncheck all friends
+                document.querySelectorAll('#friend-list input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // In a real app, you would send notifications to friends here
+            }
+
+            // Remove scheduled event
+            function removeScheduledEvent(id) {
+                scheduledEvents = scheduledEvents.filter(event => event.id !== id);
+                saveEvents();
+                renderScheduledEvents();
+                showNotification('Scheduled playback removed', 'info');
+            }
+
+            // Accept friend scheduled event
+            function acceptFriendEvent(id) {
+                const event = friendScheduledEvents.find(e => e.id === id);
+                if (!event) return;
+                
+                // Update status
+                event.status = 'accepted';
+                saveEvents();
+                renderFriendScheduledEvents();
+                
+                // Schedule the playback
+                const now = new Date().getTime();
+                const timeout = event.time - now;
+                
+                if (timeout > 0) {
+                    setTimeout(() => {
+                        loadSong(event.songIndex);
+                        if (!isPlaying) togglePlay();
+                        showNotification(`Now playing: ${musicLibrary[event.songIndex].title} (scheduled by ${event.sender})`, 'success');
+                    }, timeout);
+                }
+                
+                showNotification('You accepted the scheduled playback', 'success');
+            }
+
+            // Decline friend scheduled event
+            function declineFriendEvent(id) {
+                friendScheduledEvents = friendScheduledEvents.filter(event => event.id !== id);
+                saveEvents();
+                renderFriendScheduledEvents();
+                showNotification('Scheduled playback declined', 'info');
+            }
+
+            // Render scheduled events
+            function renderScheduledEvents() {
+                scheduledListEl.innerHTML = '';
+                
+                if (scheduledEvents.filter(e => e.type === 'self').length === 0) {
+                    scheduledListEl.innerHTML = '<p>No scheduled playbacks</p>';
+                    return;
+                }
+                
+                // Sort events by time
+                const selfEvents = scheduledEvents.filter(e => e.type === 'self').sort((a, b) => a.time - b.time);
+                
+                selfEvents.forEach(event => {
+                    const song = musicLibrary[event.songIndex];
+                    const eventTime = new Date(event.time);
+                    
+                    const eventItem = document.createElement('div');
+                    eventItem.className = 'event-item';
+                    eventItem.innerHTML = `
+                        <div>
+                            <strong>${song.title}</strong> - 
+                            ${eventTime.toLocaleString()}
+                        </div>
+                        <button class="remove-event" data-id="${event.id}">Remove</button>
+                    `;
+                    
+                    const removeBtn = eventItem.querySelector('.remove-event');
+                    removeBtn.addEventListener('click', () => removeScheduledEvent(event.id));
+                    
+                    scheduledListEl.appendChild(eventItem);
+                });
+            }
+
+            // Render friend scheduled events
+            function renderFriendScheduledEvents() {
+                friendScheduledListEl.innerHTML = '';
+                
+                const friendEvents = friendScheduledEvents.filter(e => e.type === 'friend' && e.friendId === currentUser.id);
+                
+                if (friendEvents.length === 0) {
+                    friendScheduledListEl.innerHTML = '<p>No playbacks scheduled for you</p>';
+                    return;
+                }
+                
+                // Sort events by time
+                friendEvents.sort((a, b) => a.time - b.time);
+                
+                friendEvents.forEach(event => {
+                    const song = musicLibrary[event.songIndex];
+                    const eventTime = new Date(event.time);
+                    const now = new Date().getTime();
+                    const isPast = event.time < now;
+                    
+                    const eventItem = document.createElement('div');
+                    eventItem.className = 'event-item';
+                    
+                    if (event.status === 'pending') {
+                        eventItem.innerHTML = `
+                            <div>
+                                <strong>${song.title}</strong><br>
+                                Scheduled by: ${event.sender}<br>
+                                Time: ${eventTime.toLocaleString()}<br>
+                                ${event.message ? `Message: "${event.message}"` : ''}
+                            </div>
+                            <div>
+                                <button class="accept-event btn-success" data-id="${event.id}">Accept</button>
+                                <button class="decline-event btn-danger" data-id="${event.id}">Decline</button>
+                            </div>
+                        `;
+                    } else {
+                        eventItem.innerHTML = `
+                            <div>
+                                <strong>${song.title}</strong><br>
+                                Scheduled by: ${event.sender}<br>
+                                Time: ${eventTime.toLocaleString()}<br>
+                                Status: <span class="status-badge status-${event.status}">${event.status}</span><br>
+                                ${event.message ? `Message: "${event.message}"` : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    if (event.status === 'pending') {
+                        const acceptBtn = eventItem.querySelector('.accept-event');
+                        const declineBtn = eventItem.querySelector('.decline-event');
+                        acceptBtn.addEventListener('click', () => acceptFriendEvent(event.id));
+                        declineBtn.addEventListener('click', () => declineFriendEvent(event.id));
+                    }
+                    
+                    friendScheduledListEl.appendChild(eventItem);
+                });
+            }
+
+            // Render friends lists for scheduling and management
+            function renderFriendsLists() {
+                // Clear existing lists
+                friendListEl.innerHTML = '';
+                pendingRequestsList.innerHTML = '';
+                yourFriendsList.innerHTML = '';
+                
+                // For scheduling - only show accepted friends
+                const acceptedFriends = currentUser.friends.filter(f => f.status === 'accepted');
+                if (acceptedFriends.length === 0) {
+                    friendListEl.innerHTML = '<p>No friends added yet</p>';
+                } else {
+                    acceptedFriends.forEach(friend => {
+                        const friendItem = document.createElement('div');
+                        friendItem.className = 'friend-item';
+                        friendItem.innerHTML = `
+                            <div class="friend-info">
+                                <input type="checkbox" id="sched-friend-${friend.id}" value="${friend.id}">
+                                <label for="sched-friend-${friend.id}">${friend.name} (${friend.email})</label>
+                            </div>
+                        `;
+                        friendListEl.appendChild(friendItem);
+                    });
+                }
+                
+                // For pending requests - requests made to you
+                const pendingRequests = currentUser.friends.filter(f => f.status === 'pending' && f.requestedBy === 'them');
+                if (pendingRequests.length === 0) {
+                    pendingRequestsList.innerHTML = '<p>No pending requests</p>';
+                } else {
+                    pendingRequests.forEach(friend => {
+                        const requestItem = document.createElement('div');
+                        requestItem.className = 'friend-item';
+                        requestItem.innerHTML = `
+                            <div class="friend-info">
+                                <img src="${usersDatabase.find(u => u.id === friend.id)?.avatar || 'https://via.placeholder.com/40'}" class="friend-avatar">
+                                <div>
+                                    <strong>${friend.name}</strong><br>
+                                    ${friend.email}
+                                </div>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="accept-friend btn-success" data-id="${friend.id}">Accept</button>
+                                <button class="decline-friend btn-danger" data-id="${friend.id}">Decline</button>
+                            </div>
+                        `;
+                        
+                        const acceptBtn = requestItem.querySelector('.accept-friend');
+                        const declineBtn = requestItem.querySelector('.decline-friend');
+                        acceptBtn.addEventListener('click', () => acceptFriendRequest(friend.id));
+                        declineBtn.addEventListener('click', () => declineFriendRequest(friend.id));
+                        
+                        pendingRequestsList.appendChild(requestItem);
+                    });
+                }
+                
+                // For your friends list - accepted friends
+                const yourFriends = currentUser.friends.filter(f => f.status === 'accepted');
+                if (yourFriends.length === 0) {
+                    yourFriendsList.innerHTML = '<p>You have no friends yet</p>';
+                } else {
+                    yourFriends.forEach(friend => {
+                        const friendItem = document.createElement('div');
+                        friendItem.className = 'friend-item';
+                        friendItem.innerHTML = `
+                            <div class="friend-info">
+                                <img src="${usersDatabase.find(u => u.id === friend.id)?.avatar || 'https://via.placeholder.com/40'}" class="friend-avatar">
+                                <div>
+                                    <strong>${friend.name}</strong><br>
+                                    ${friend.email}
+                                </div>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="remove-friend btn-danger" data-id="${friend.id}">Remove</button>
+                            </div>
+                        `;
+                        
+                        const removeBtn = friendItem.querySelector('.remove-friend');
+                        removeBtn.addEventListener('click', () => removeFriend(friend.id));
+                        
+                        yourFriendsList.appendChild(friendItem);
+                    });
+                }
+            }
+
+            // Accept friend request
+            function acceptFriendRequest(friendId) {
+                const friendIndex = currentUser.friends.findIndex(f => f.id === friendId);
+                if (friendIndex !== -1) {
+                    currentUser.friends[friendIndex].status = 'accepted';
+                    delete currentUser.friends[friendIndex].requestedBy;
+                    saveCurrentUser();
+                    renderFriendsLists();
+                    showNotification('Friend request accepted', 'success');
+                }
+            }
+
+            // Decline friend request
+            function declineFriendRequest(friendId) {
+                currentUser.friends = currentUser.friends.filter(f => f.id !== friendId);
+                saveCurrentUser();
+                renderFriendsLists();
+                showNotification('Friend request declined', 'info');
+            }
+
+            // Remove friend
+            function removeFriend(friendId) {
+                currentUser.friends = currentUser.friends.filter(f => f.id !== friendId);
+                saveCurrentUser();
+                renderFriendsLists();
+                showNotification('Friend removed', 'info');
+            }
+
+            // Search for friends by email
+            function searchFriendByEmail(email) {
+                if (!email) {
+                    showNotification('Please enter an email address', 'error');
+                    return;
+                }
+                
+                // Find user in database (excluding current user and existing friends)
+                const existingFriendIds = currentUser.friends.map(f => f.id);
+                const user = usersDatabase.find(u => 
+                    u.email.toLowerCase() === email.toLowerCase() && 
+                    u.id !== currentUser.id && 
+                    !existingFriendIds.includes(u.id)
+                );
+                
+                searchResultsDiv.innerHTML = '';
+                
+                if (!user) {
+                    searchResultsDiv.innerHTML = '<p>No user found with that email</p>';
+                    return;
+                }
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'friend-item';
+                resultItem.innerHTML = `
+                    <div class="friend-info">
+                        <img src="${user.avatar}" class="friend-avatar">
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            ${user.email}
+                        </div>
+                    </div>
+                    <button class="send-request-btn" data-id="${user.id}">Send Request</button>
+                `;
+                
+                const sendRequestBtn = resultItem.querySelector('.send-request-btn');
+                sendRequestBtn.addEventListener('click', () => sendFriendRequest(user));
+                
+                searchResultsDiv.appendChild(resultItem);
+            }
+
+            // Send friend request
+            function sendFriendRequest(user) {
+                // Check if request already exists
+                const existingRequest = currentUser.friends.find(f => f.id === user.id);
+                
+                if (existingRequest) {
+                    if (existingRequest.status === 'pending' && existingRequest.requestedBy === 'me') {
+                        showNotification('Friend request already sent', 'info');
+                    } else if (existingRequest.status === 'pending' && existingRequest.requestedBy === 'them') {
+                        // Accept the existing request
+                        acceptFriendRequest(user.id);
+                    }
+                    return;
+                }
+                
+                // Add new pending request
+                currentUser.friends.push({
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    status: 'pending',
+                    requestedBy: 'me'
+                });
+                
+                saveCurrentUser();
+                renderFriendsLists();
+                showNotification('Friend request sent', 'success');
+                closeModal();
+            }
+
+            // Save events to localStorage
+            function saveEvents() {
+                localStorage.setItem('scheduledEvents', JSON.stringify(scheduledEvents));
+                localStorage.setItem('friendScheduledEvents', JSON.stringify(friendScheduledEvents));
+            }
+
+            // Save current user data to localStorage
+            function saveCurrentUser() {
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+
+            // Load events from localStorage
+            function loadSavedEvents() {
+                const savedEvents = localStorage.getItem('scheduledEvents');
+                const savedFriendEvents = localStorage.getItem('friendScheduledEvents');
+                const savedUser = localStorage.getItem('currentUser');
+                
+                if (savedEvents) {
+                    scheduledEvents = JSON.parse(savedEvents);
+                    // Check for any events that should have already triggered
+                    const now = new Date().getTime();
+                    scheduledEvents = scheduledEvents.filter(event => event.time > now);
+                    renderScheduledEvents();
+                }
+                
+                if (savedFriendEvents) {
+                    friendScheduledEvents = JSON.parse(savedFriendEvents);
+                    renderFriendScheduledEvents();
+                }
+                
+                if (savedUser) {
+                    Object.assign(currentUser, JSON.parse(savedUser));
+                }
+            }
+
+            // Show notification
+            function showNotification(message, type) {
+                notificationEl.textContent = message;
+                notificationEl.style.backgroundColor = type === 'error' ? '#e74c3c' : 
+                                                    type === 'success' ? '#2ecc71' : '#3498db';
+                notificationEl.style.display = 'block';
+                
+                setTimeout(() => {
+                    notificationEl.style.display = 'none';
+                }, 3000);
+            }
+
+            // Modal functions
+            function openModal() {
+                addFriendModal.style.display = 'flex';
+                searchEmailInput.value = '';
+                searchResultsDiv.innerHTML = '';
+            }
+
+            function closeModal() {
+                addFriendModal.style.display = 'none';
+            }
+
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    // Hide all tab contents
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Show corresponding content
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    // Special case for events tabs
+                    if (tabId === 'self-events') {
+                        document.querySelector('.tab[data-tab="self"]').classList.add('active');
+                        document.querySelector('.tab[data-tab="friend"]').classList.remove('active');
+                        document.querySelector('.tab[data-tab="friends-manage"]').classList.remove('active');
+                    } else if (tabId === 'friend-events') {
+                        document.querySelector('.tab[data-tab="friend"]').classList.add('active');
+                        document.querySelector('.tab[data-tab="self"]').classList.remove('active');
+                        document.querySelector('.tab[data-tab="friends-manage"]').classList.remove('active');
+                    }
+                });
+            });
+
+            // Event listeners
+            playBtn.addEventListener('click', togglePlay);
+            prevBtn.addEventListener('click', prevSong);
+            nextBtn.addEventListener('click', nextSong);
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('ended', nextSong);
+            progressBar.addEventListener('click', setProgress);
+            addScheduleBtn.addEventListener('click', addScheduledPlayback);
+            addFriendScheduleBtn.addEventListener('click', addFriendScheduledPlayback);
+            addFriendBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            searchFriendBtn.addEventListener('click', () => searchFriendByEmail(searchEmailInput.value));
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === addFriendModal) {
+                    closeModal();
+                }
+            });
+
+            // Initialize the player
+            initPlayer();
+        });
+    </script>
+</body>
+</html>
