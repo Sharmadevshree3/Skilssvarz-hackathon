@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Your Song</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url(nft\ 1.gif)  ;
+     
+      padding: 30px;
+      text-align: center;
+     ;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      padding: 12px;
+      width: 90%;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    audio {
+      margin-top: 20px;
+      width: 100%;
+    }
+    .hidden {
+      display: none;
+    }
+    .warning {
+      color: red;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload Your Song</h2>
+
+    <form id="uploadForm">
+      <input type="text" id="songTitle" placeholder="Enter Song Title" required><br>
+      <input type="file" id="songFile" accept="audio/*" required><br>
+      <button type="submit">Upload Song</button>
+    </form>
+
+    <div id="songSection" class="hidden">
+      <h3 id="displayTitle"></h3>
+      <audio id="audioPlayer" controls></audio>
+      <p><strong>Views:</strong> <span id="viewCount">0</span></p>
+      <button onclick="incrementViews()">Simulate View</button>
+      <p id="commissionMsg" class="hidden warning"></p>
+    </div>
+  </div>
+  
+
+  <script>
+    let views = 0;
+
+    const uploadForm = document.getElementById('uploadForm');
+    const songSection = document.getElementById('songSection');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const viewCount = document.getElementById('viewCount');
+    const displayTitle = document.getElementById('displayTitle');
+    const commissionMsg = document.getElementById('commissionMsg');
+
+    uploadForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const title = document.getElementById('songTitle').value;
+      const file = document.getElementById('songFile').files[0];
+
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        audioPlayer.src = fileURL;
+        displayTitle.textContent = title;
+        views = 0;
+        viewCount.textContent = views;
+        commissionMsg.classList.add('hidden');
+        songSection.classList.remove('hidden');
+      }
+    });
+
+    function incrementViews() {
+      views++;
+      viewCount.textContent = views;
+
+      if (views > 10000) {
+        commissionMsg.textContent = "🎉 Your song has reached 10,000+ views! A 40% commission now applies.";
+        commissionMsg.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
